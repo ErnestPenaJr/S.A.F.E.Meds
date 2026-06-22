@@ -66,4 +66,8 @@ Defined in `src/db/schema.js` (Drizzle): `profiles`, `medications`, `medication_
 
 ## Status
 
-**Phase 0 (scaffold) complete.** App boots and builds; routing, theme-token base, Drizzle schema + first migration, Netlify config + `/api/health` function, and PWA are wired. Pages are placeholders (`src/components/common/PagePlaceholder.jsx`); `src/Layout.jsx` is a temporary shell. Phases: 1 = shell/themes/auth, 2 = core meds+schedule, 3 = interactions, 4 = pharmacy, 5 = sharing+emergency card, 6 = polish+deploy. See the task list.
+**Phases 0–3 complete.** Done: scaffold; 4-theme system + themed bottom-nav shell + stubbed auth; core meds/schedule/dashboard/peptides; AI drug interactions. Remaining: **4** = pharmacy finder, **5** = sharing + emergency card, **6** = PWA polish + deploy.
+
+Still running in **demo mode** (localStorage data + stubbed auth + mock AI) until Neon/Stack/Anthropic keys are added — flip happens via `VITE_STACK_PROJECT_ID` (data + AI) and `ANTHROPIC_API_KEY` (the function), with no page changes.
+
+**AI layer (Phase 3):** `src/api/ai.js` is the facade. Demo mode → `src/lib/interactionsMock.js`; live mode → `POST /api/analyze-interactions` (`netlify/functions/analyze-interactions.js`), which calls **Claude `claude-opus-4-8`** with adaptive thinking + **structured outputs** (`output_config.format` against a JSON schema) and degrades to a clear "not configured" payload when `ANTHROPIC_API_KEY` is unset. Drug-drug results persist to the `DrugInteraction` entity (acknowledge state carried across re-runs); food + safety are cached in localStorage (`src/lib/analysisCache.js`). `@anthropic-ai/sdk` is a function-only dependency — never import it under `src/` (it must not enter the client bundle).
