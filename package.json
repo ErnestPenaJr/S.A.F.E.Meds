@@ -1,7 +1,7 @@
 {
   "name": "safemeds",
   "private": true,
-  "version": "0.1.0",
+  "version": "1.0.0",
   "type": "module",
   "description": "S.A.F.E Meds — smart medication management (React + Vite + Netlify + Neon)",
   "scripts": {

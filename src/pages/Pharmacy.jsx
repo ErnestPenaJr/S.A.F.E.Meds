@@ -1,10 +1,12 @@
-import { useState } from 'react';
+import { useState, lazy, Suspense } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { MapPin, Navigation, Star, Phone, Loader2, Trash2 } from 'lucide-react';
 import { Pharmacy as PharmacyEntity } from '@/api/entities';
 import { findNearbyPharmacies, kmToMiles, DEFAULT_LOCATION } from '@/api/pharmacy';
-import PharmacyMap from '@/components/pharmacy/PharmacyMap';
 import EmptyState from '@/components/common/EmptyState';
+
+// Leaflet is heavy — load the map (and Leaflet) only when results exist.
+const PharmacyMap = lazy(() => import('@/components/pharmacy/PharmacyMap'));
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -110,7 +112,11 @@ export default function Pharmacy() {
         </section>
       )}
 
-      {center && <PharmacyMap center={center} pharmacies={results} selectedId={selectedId} onSelect={setSelectedId} />}
+      {center && (
+        <Suspense fallback={<div className="grid h-[320px] place-items-center rounded-xl border border-border text-sm text-muted-foreground">Loading map…</div>}>
+          <PharmacyMap center={center} pharmacies={results} selectedId={selectedId} onSelect={setSelectedId} />
+        </Suspense>
+      )}
 
       {status === 'idle' && favorites.length === 0 && (
         <EmptyState

@@ -66,7 +66,9 @@ Defined in `src/db/schema.js` (Drizzle): `profiles`, `medications`, `medication_
 
 ## Status
 
-**Phases 0–5 complete.** Done: scaffold; 4-theme system + themed shell + stubbed auth; core meds/schedule/dashboard/peptides; AI drug interactions; pharmacy finder; sharing (access-code lists + public `/sharedview`) + printable emergency card (allergies via `src/lib/profileLocal.js`, contacts via the `EmergencyContact` entity). Remaining: **6** = PWA polish + deploy (incl. code-splitting the Leaflet/map route — the bundle is currently >500 kB).
+**All 6 phases' app code complete** (scaffold; themes+shell+stub-auth; meds/schedule/dashboard/peptides; AI interactions; pharmacy; sharing + emergency card; PWA polish). The map route is code-split (`PharmacyMap` lazy-loaded) so the main bundle is ~125 kB gzip. Deployable to Netlify as a working **demo today** — see `DEPLOY.md`.
+
+**Remaining for production (the "exit demo mode" work):** the per-entity data API functions don't exist yet — `src/api/store/httpStore.js` expects `/api/<entity>` endpoints, but only `analyze-interactions` is built. Setting `VITE_STACK_PROJECT_ID` flips the client to that HTTP store, so build `netlify/functions/<entity>.js` (verify Stack session, scope by `user_id`, schema in `src/db/schema.js`) + run `db:migrate` + wire `src/lib/AuthContext.jsx` to Stack *before* flipping. Until then, leave `VITE_STACK_PROJECT_ID` unset and the app runs fully in demo mode.
 
 Navigation: the bottom bar holds Home / Meds / **+ (log dose → AddMedication)** / Schedule / **More**; the "More" sheet (`src/Layout.jsx`) is how Interactions, Pharmacy, Share, Emergency Card, and Profile are reached. `/sharedview` renders bare (no auth, no Layout) — gated in `src/App.jsx`. Emergency Card prints via `window.print()`; app chrome carries `print:hidden`.
 
