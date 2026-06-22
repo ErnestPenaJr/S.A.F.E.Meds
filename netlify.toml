@@ -1,0 +1,20 @@
+# Netlify configuration for S.A.F.E Meds
+[build]
+  command = "npm run build"
+  publish = "dist"
+  functions = "netlify/functions"
+
+[functions]
+  node_bundler = "esbuild"
+
+# Route /api/* to Netlify Functions (our data + AI layer)
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/:splat"
+  status = 200
+
+# SPA fallback — everything else serves the app shell
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

@@ -1,0 +1,84 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+  Theme tokens. Default (:root) is the "Vital" theme.
+  Phase 1 adds [data-theme="after-dark"], [data-theme="bento"], and
+  [data-theme="clear"] blocks that override these same variables, plus
+  per-theme --font-heading / hero treatments. Components only read the vars,
+  so switching the data-theme attribute reskins the whole app instantly.
+*/
+@layer base {
+  :root {
+    --background: 170 21% 95%;
+    --foreground: 176 50% 11%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 176 50% 11%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 176 50% 11%;
+
+    --primary: 172 85% 38%;            /* teal */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 221 83% 53%;          /* clinical blue */
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 170 18% 93%;
+    --muted-foreground: 175 12% 38%;
+    --accent: 170 30% 90%;
+    --accent-foreground: 176 50% 15%;
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+    --success: 142 76% 36%;
+    --warning: 32 95% 44%;
+
+    --border: 170 20% 88%;
+    --input: 170 20% 88%;
+    --ring: 172 85% 38%;
+
+    --peptide: 262 83% 58%;            /* violet — consistent across themes */
+
+    --radius: 0.75rem;
+
+    --font-body: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --font-heading: var(--font-body);
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+    -webkit-tap-highlight-color: transparent;
+    overscroll-behavior-y: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@layer utilities {
+  /* mobile safe-area helpers (notches / home indicators) */
+  .pt-safe { padding-top: env(safe-area-inset-top); }
+  .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
+  .min-h-dvh { min-height: 100dvh; }
+}
