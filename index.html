@@ -9,6 +9,13 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="description" content="S.A.F.E Meds — smart medication management. Track medications, supplements, vitamins, and peptides; never miss a dose." />
     <title>S.A.F.E Meds</title>
+    <script>
+      // Apply the saved theme before first paint to avoid a flash of the default.
+      try {
+        var t = localStorage.getItem('safemeds_theme');
+        if (t) document.documentElement.setAttribute('data-theme', t);
+      } catch (e) {}
+    </script>
   </head>
   <body>
     <div id="root"></div>

@@ -1,62 +1,97 @@
+import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Home, Pill, CalendarClock, ShieldAlert, User } from 'lucide-react';
+import { Home, Pill, CalendarClock, User, Plus, Palette } from 'lucide-react';
 import { createPageUrl } from '@/utils';
 import { cn } from '@/lib/utils';
+import { useAuth } from '@/lib/AuthContext';
+import BottomSheet from '@/components/common/BottomSheet';
+import ThemePicker from '@/components/common/ThemePicker';
 
-/*
-  TEMPORARY Phase-0 shell so the app is navigable. Phase 1 replaces this with
-  the themed, per-theme bottom-nav Layout (with the center "Log dose" action,
-  theme-aware styling, and auth-aware header).
-*/
 const NAV = [
-  { name: 'Home', label: 'Home', icon: Home, to: '/' },
-  { name: 'Medications', label: 'Meds', icon: Pill, to: createPageUrl('Medications') },
-  { name: 'Schedule', label: 'Schedule', icon: CalendarClock, to: createPageUrl('Schedule') },
-  { name: 'Interactions', label: 'Interactions', icon: ShieldAlert, to: createPageUrl('Interactions') },
-  { name: 'Profile', label: 'Me', icon: User, to: createPageUrl('Profile') }
+  { label: 'Home', icon: Home, to: '/' },
+  { label: 'Meds', icon: Pill, to: createPageUrl('Medications') },
+  { label: 'Schedule', icon: CalendarClock, to: createPageUrl('Schedule') },
+  { label: 'Me', icon: User, to: createPageUrl('Profile') }
 ];
+
+function NavItem({ label, icon: Icon, to, pathname }) {
+  const active = to === '/' ? pathname === '/' : pathname.startsWith(to);
+  return (
+    <Link
+      to={to}
+      className={cn(
+        'flex w-16 flex-col items-center gap-1 rounded-lg py-1 text-[11px] font-semibold transition-colors',
+        active ? 'text-primary' : 'text-muted-foreground'
+      )}
+    >
+      <Icon className="h-5 w-5" strokeWidth={2} />
+      {label}
+    </Link>
+  );
+}
 
 export default function Layout({ children }) {
   const { pathname } = useLocation();
+  const { user } = useAuth();
+  const [themeOpen, setThemeOpen] = useState(false);
+  const initial = (user?.fullName || user?.email || '?').charAt(0).toUpperCase();
 
   return (
     <div className="min-h-dvh flex flex-col bg-background">
-      <header className="pt-safe sticky top-0 z-20 border-b border-border bg-card/80 backdrop-blur">
+      <header className="pt-safe sticky top-0 z-30 border-b border-border bg-card/80 backdrop-blur">
         <div className="mx-auto flex h-14 w-full max-w-screen-sm items-center gap-2 px-4">
-          <div className="h-7 w-7 rounded-lg bg-gradient-to-br from-secondary to-primary" />
-          <span className="font-heading text-lg font-extrabold tracking-tight">
-            S.A.F.E <span className="text-primary">Meds</span>
-          </span>
-          <span className="ml-auto rounded-full bg-muted px-2 py-0.5 text-[11px] font-semibold text-muted-foreground">
-            Phase 0
-          </span>
+          <Link to="/" className="flex items-center gap-2">
+            <span className="h-7 w-7 rounded-lg bg-gradient-to-br from-secondary to-primary" />
+            <span className="font-heading text-lg font-extrabold tracking-tight">
+              S.A.F.E <span className="text-primary">Meds</span>
+            </span>
+          </Link>
+          <div className="ml-auto flex items-center gap-1">
+            <button
+              type="button"
+              onClick={() => setThemeOpen(true)}
+              aria-label="Change theme"
+              className="grid h-9 w-9 place-items-center rounded-full text-muted-foreground transition-colors hover:bg-muted"
+            >
+              <Palette className="h-5 w-5" />
+            </button>
+            <Link
+              to={createPageUrl('Profile')}
+              aria-label="Profile"
+              className="grid h-9 w-9 place-items-center rounded-full bg-muted text-sm font-bold text-foreground"
+            >
+              {initial}
+            </Link>
+          </div>
         </div>
       </header>
 
-      <main className="mx-auto w-full max-w-screen-sm flex-1 px-4 py-5 pb-24">
-        {children}
-      </main>
+      <main className="mx-auto w-full max-w-screen-sm flex-1 px-4 py-5 pb-28">{children}</main>
 
-      <nav className="pb-safe fixed inset-x-0 bottom-0 z-20 border-t border-border bg-card/90 backdrop-blur">
-        <div className="mx-auto flex max-w-screen-sm items-center justify-around px-2 py-2">
-          {NAV.map(({ name, label, icon: Icon, to }) => {
-            const active = pathname === to;
-            return (
-              <Link
-                key={name}
-                to={to}
-                className={cn(
-                  'flex flex-col items-center gap-1 rounded-lg px-3 py-1 text-[11px] font-semibold transition-colors',
-                  active ? 'text-primary' : 'text-muted-foreground'
-                )}
-              >
-                <Icon className="h-5 w-5" strokeWidth={2} />
-                {label}
-              </Link>
-            );
-          })}
+      <nav className="pb-safe fixed inset-x-0 bottom-0 z-30 border-t border-border bg-card/90 backdrop-blur">
+        <div className="relative mx-auto flex max-w-screen-sm items-center justify-around px-2 py-2">
+          {NAV.slice(0, 2).map((item) => (
+            <NavItem key={item.label} {...item} pathname={pathname} />
+          ))}
+          <Link
+            to={createPageUrl('AddMedication')}
+            aria-label="Log a dose"
+            className="grid h-14 w-14 -translate-y-5 place-items-center rounded-2xl bg-gradient-to-br from-secondary to-primary text-primary-foreground shadow-lg shadow-primary/30"
+          >
+            <Plus className="h-7 w-7" strokeWidth={2.5} />
+          </Link>
+          {NAV.slice(2).map((item) => (
+            <NavItem key={item.label} {...item} pathname={pathname} />
+          ))}
         </div>
       </nav>
+
+      <BottomSheet open={themeOpen} onClose={() => setThemeOpen(false)} title="Choose your look">
+        <ThemePicker onPick={() => {}} />
+        <p className="mt-3 text-center text-xs text-muted-foreground">
+          Saved to your profile — applies on every device.
+        </p>
+      </BottomSheet>
     </div>
   );
 }

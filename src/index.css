@@ -46,6 +46,90 @@
     --font-heading: var(--font-body);
   }
 
+  /* ── After Dark: dark navy + mint, glanceable ── */
+  [data-theme="after-dark"] {
+    --background: 222 47% 8%;
+    --foreground: 214 44% 94%;
+    --card: 217 39% 12%;
+    --card-foreground: 214 44% 94%;
+    --popover: 217 39% 12%;
+    --popover-foreground: 214 44% 94%;
+    --primary: 158 64% 52%;
+    --primary-foreground: 158 80% 9%;
+    --secondary: 199 93% 60%;
+    --secondary-foreground: 210 50% 10%;
+    --muted: 217 33% 17%;
+    --muted-foreground: 215 20% 65%;
+    --accent: 217 33% 20%;
+    --accent-foreground: 214 44% 92%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+    --success: 158 64% 52%;
+    --warning: 38 92% 55%;
+    --border: 216 34% 22%;
+    --input: 216 34% 22%;
+    --ring: 158 64% 52%;
+    --peptide: 258 90% 74%;
+    --radius: 0.875rem;
+    --font-heading: var(--font-body);
+  }
+
+  /* ── Bento: bold violet/pink, color-coded ── */
+  [data-theme="bento"] {
+    --background: 255 60% 96%;
+    --foreground: 251 35% 12%;
+    --card: 0 0% 100%;
+    --card-foreground: 251 35% 12%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 251 35% 12%;
+    --primary: 263 70% 50%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 333 71% 51%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 258 35% 93%;
+    --muted-foreground: 255 12% 42%;
+    --accent: 258 45% 92%;
+    --accent-foreground: 263 70% 35%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+    --success: 142 71% 40%;
+    --warning: 25 95% 50%;
+    --border: 258 35% 89%;
+    --input: 258 35% 89%;
+    --ring: 263 70% 50%;
+    --peptide: 263 70% 50%;
+    --radius: 1rem;
+    --font-heading: "Trebuchet MS", "Segoe UI", system-ui, sans-serif;
+  }
+
+  /* ── Clear: warm sand + green, accessible serif ── */
+  [data-theme="clear"] {
+    --background: 40 45% 94%;
+    --foreground: 48 12% 11%;
+    --card: 0 0% 100%;
+    --card-foreground: 48 12% 11%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 48 12% 11%;
+    --primary: 142 72% 29%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 26 90% 37%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 40 30% 90%;
+    --muted-foreground: 40 8% 36%;
+    --accent: 140 35% 90%;
+    --accent-foreground: 142 72% 22%;
+    --destructive: 0 72% 45%;
+    --destructive-foreground: 0 0% 100%;
+    --success: 142 72% 29%;
+    --warning: 26 90% 40%;
+    --border: 40 25% 85%;
+    --input: 40 25% 85%;
+    --ring: 142 72% 29%;
+    --peptide: 262 70% 52%;
+    --radius: 1rem;
+    --font-heading: Georgia, "Times New Roman", serif;
+  }
+
   * {
     @apply border-border;
   }
