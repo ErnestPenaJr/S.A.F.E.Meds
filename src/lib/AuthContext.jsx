@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { setAuthToken } from '@/api/client';
+import { setCurrentUserId } from '@/api/session';
 
 /*
   Auth abstraction. Today it runs in STUB MODE because the Neon Auth (Stack
@@ -35,6 +36,7 @@ export function AuthProvider({ children }) {
           const u = JSON.parse(saved);
           setUser(u);
           setAuthToken(`stub:${u.id}`);
+          setCurrentUserId(u.id);
         }
       } catch {
         /* ignore */
@@ -56,6 +58,7 @@ export function AuthProvider({ children }) {
     };
     setUser(demo);
     setAuthToken(`stub:${demo.id}`);
+    setCurrentUserId(demo.id);
     try {
       localStorage.setItem(STUB_SESSION_KEY, JSON.stringify(demo));
     } catch {
@@ -66,6 +69,7 @@ export function AuthProvider({ children }) {
   const signOut = useCallback(async () => {
     setUser(null);
     setAuthToken(null);
+    setCurrentUserId(null);
     try {
       localStorage.removeItem(STUB_SESSION_KEY);
     } catch {

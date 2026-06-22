@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils';
 import { useAuth } from '@/lib/AuthContext';
 import BottomSheet from '@/components/common/BottomSheet';
 import ThemePicker from '@/components/common/ThemePicker';
+import NotificationManager from '@/components/notifications/NotificationManager';
 
 const NAV = [
   { label: 'Home', icon: Home, to: '/' },
@@ -38,6 +39,7 @@ export default function Layout({ children }) {
 
   return (
     <div className="min-h-dvh flex flex-col bg-background">
+      <NotificationManager />
       <header className="pt-safe sticky top-0 z-30 border-b border-border bg-card/80 backdrop-blur">
         <div className="mx-auto flex h-14 w-full max-w-screen-sm items-center gap-2 px-4">
           <Link to="/" className="flex items-center gap-2">
