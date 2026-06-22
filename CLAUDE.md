@@ -66,7 +66,7 @@ Defined in `src/db/schema.js` (Drizzle): `profiles`, `medications`, `medication_
 
 ## Status
 
-**Phases 0–3 complete.** Done: scaffold; 4-theme system + themed bottom-nav shell + stubbed auth; core meds/schedule/dashboard/peptides; AI drug interactions. Remaining: **4** = pharmacy finder, **5** = sharing + emergency card, **6** = PWA polish + deploy.
+**Phases 0–4 complete.** Done: scaffold; 4-theme system + themed bottom-nav shell + stubbed auth; core meds/schedule/dashboard/peptides; AI drug interactions; pharmacy finder (Leaflet/OSM + Overpass geo lookup, save favorites). Remaining: **5** = sharing + emergency card, **6** = PWA polish + deploy (incl. code-splitting the Leaflet/map route — the bundle is currently >500 kB).
 
 Still running in **demo mode** (localStorage data + stubbed auth + mock AI) until Neon/Stack/Anthropic keys are added — flip happens via `VITE_STACK_PROJECT_ID` (data + AI) and `ANTHROPIC_API_KEY` (the function), with no page changes.
 
