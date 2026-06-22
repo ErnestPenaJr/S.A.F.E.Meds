@@ -66,7 +66,9 @@ Defined in `src/db/schema.js` (Drizzle): `profiles`, `medications`, `medication_
 
 ## Status
 
-**Phases 0–4 complete.** Done: scaffold; 4-theme system + themed bottom-nav shell + stubbed auth; core meds/schedule/dashboard/peptides; AI drug interactions; pharmacy finder (Leaflet/OSM + Overpass geo lookup, save favorites). Remaining: **5** = sharing + emergency card, **6** = PWA polish + deploy (incl. code-splitting the Leaflet/map route — the bundle is currently >500 kB).
+**Phases 0–5 complete.** Done: scaffold; 4-theme system + themed shell + stubbed auth; core meds/schedule/dashboard/peptides; AI drug interactions; pharmacy finder; sharing (access-code lists + public `/sharedview`) + printable emergency card (allergies via `src/lib/profileLocal.js`, contacts via the `EmergencyContact` entity). Remaining: **6** = PWA polish + deploy (incl. code-splitting the Leaflet/map route — the bundle is currently >500 kB).
+
+Navigation: the bottom bar holds Home / Meds / **+ (log dose → AddMedication)** / Schedule / **More**; the "More" sheet (`src/Layout.jsx`) is how Interactions, Pharmacy, Share, Emergency Card, and Profile are reached. `/sharedview` renders bare (no auth, no Layout) — gated in `src/App.jsx`. Emergency Card prints via `window.print()`; app chrome carries `print:hidden`.
 
 Still running in **demo mode** (localStorage data + stubbed auth + mock AI) until Neon/Stack/Anthropic keys are added — flip happens via `VITE_STACK_PROJECT_ID` (data + AI) and `ANTHROPIC_API_KEY` (the function), with no page changes.
 

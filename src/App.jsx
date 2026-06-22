@@ -1,5 +1,5 @@
 import { QueryClientProvider } from '@tanstack/react-query';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { queryClient } from '@/lib/queryClient';
 import { ThemeProvider } from '@/lib/ThemeContext';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
@@ -7,6 +7,7 @@ import { PAGES, mainPage } from '@/pages.config';
 import { createPageUrl } from '@/utils';
 import Layout from '@/Layout';
 import Login from '@/pages/Login';
+import SharedView from '@/pages/SharedView';
 import NotFound from '@/pages/NotFound';
 
 function FullScreenSpinner() {
@@ -19,6 +20,13 @@ function FullScreenSpinner() {
 
 function Gate() {
   const { isAuthenticated, isLoading } = useAuth();
+  const { pathname } = useLocation();
+
+  // Public, no-auth route: a shared list opened via access code.
+  if (pathname.toLowerCase().startsWith(createPageUrl('SharedView'))) {
+    return <SharedView />;
+  }
+
   if (isLoading) return <FullScreenSpinner />;
   if (!isAuthenticated) return <Login />;
   return (
