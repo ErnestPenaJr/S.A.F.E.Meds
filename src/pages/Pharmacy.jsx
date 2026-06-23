@@ -112,12 +112,6 @@ export default function Pharmacy() {
         </section>
       )}
 
-      {center && (
-        <Suspense fallback={<div className="grid h-[320px] place-items-center rounded-xl border border-border text-sm text-muted-foreground">Loading map…</div>}>
-          <PharmacyMap center={center} pharmacies={results} selectedId={selectedId} onSelect={setSelectedId} />
-        </Suspense>
-      )}
-
       {status === 'idle' && favorites.length === 0 && (
         <EmptyState
           icon={MapPin}
@@ -128,8 +122,17 @@ export default function Pharmacy() {
         </EmptyState>
       )}
 
-      {status === 'done' && (
-        <section className="flex flex-col gap-2">
+      <div className="lg:grid lg:grid-cols-2 lg:items-start lg:gap-6">
+        {center && (
+          <Suspense fallback={<div className="grid h-[320px] place-items-center rounded-xl border border-border text-sm text-muted-foreground">Loading map…</div>}>
+            <div className="lg:sticky lg:top-8">
+              <PharmacyMap center={center} pharmacies={results} selectedId={selectedId} onSelect={setSelectedId} />
+            </div>
+          </Suspense>
+        )}
+
+        {status === 'done' && (
+          <section className="flex flex-col gap-2">
           <div className="flex items-center justify-between">
             <h2 className="font-heading text-xs font-bold uppercase tracking-wide text-muted-foreground">
               Nearby{demo ? ' (sample)' : ''}
@@ -167,8 +170,9 @@ export default function Pharmacy() {
               </Card>
             );
           })}
-        </section>
-      )}
+          </section>
+        )}
+      </div>
     </div>
   );
 }

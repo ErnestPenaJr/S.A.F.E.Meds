@@ -99,7 +99,7 @@ export default function Interactions() {
   const hasAnalyzed = saved.length > 0 || Boolean(cache);
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-4 lg:mx-auto lg:w-full lg:max-w-3xl">
       <div className="flex items-center justify-between">
         <h1 className="font-heading text-2xl font-extrabold tracking-tight">Interactions</h1>
         <Button size="sm" onClick={() => analyze.mutate()} disabled={analyze.isPending || meds.length === 0}>

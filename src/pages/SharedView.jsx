@@ -33,7 +33,7 @@ export default function SharedView() {
         </div>
       </header>
 
-      <main className="mx-auto w-full max-w-screen-sm px-4 py-6">
+      <main className="mx-auto w-full max-w-screen-sm px-4 py-6 lg:max-w-2xl lg:py-10">
         {!code ? (
           <Notice title="No list specified">This link is missing its access code.</Notice>
         ) : isLoading ? (

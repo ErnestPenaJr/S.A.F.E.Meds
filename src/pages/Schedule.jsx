@@ -22,7 +22,7 @@ export default function Schedule() {
   );
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-4 lg:mx-auto lg:w-full lg:max-w-2xl">
       <h1 className="font-heading text-2xl font-extrabold tracking-tight">Schedule</h1>
 
       <div className="flex items-center justify-between rounded-xl border border-border bg-card p-2">

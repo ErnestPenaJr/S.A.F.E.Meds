@@ -141,7 +141,7 @@ export default function AddMedication() {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-6 pb-4">
+    <form onSubmit={handleSubmit} className="flex flex-col gap-6 pb-4 lg:mx-auto lg:w-full lg:max-w-2xl">
       <h1 className="font-heading text-2xl font-extrabold tracking-tight">
         {editId ? 'Edit medication' : 'Add medication'}
       </h1>

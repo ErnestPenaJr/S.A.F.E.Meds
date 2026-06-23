@@ -25,7 +25,7 @@ export default function Profile() {
   };
 
   return (
-    <div className="flex flex-col gap-7">
+    <div className="flex flex-col gap-7 lg:mx-auto lg:w-full lg:max-w-2xl">
       <section className="flex items-center gap-3">
         <span className="grid h-14 w-14 place-items-center rounded-full bg-gradient-to-br from-secondary to-primary text-xl font-bold text-primary-foreground">
           {initial}

@@ -85,7 +85,7 @@ export default function Home() {
   }
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="lg:grid lg:grid-cols-[380px_1fr] lg:items-start lg:gap-8">
       <Hero
         variant={themeMeta.hero}
         greeting={greeting}
@@ -95,7 +95,7 @@ export default function Home() {
         onTakeNext={() => next && take.mutate({ id: next.dose.id })}
       />
 
-      <section className="flex flex-col gap-3">
+      <section className="mt-6 flex flex-col gap-3 lg:mt-0">
         <h2 className="font-heading text-sm font-bold uppercase tracking-wide text-muted-foreground">Today</h2>
         {isLoading ? (
           <p className="text-sm text-muted-foreground">Loading…</p>
