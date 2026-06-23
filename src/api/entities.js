@@ -5,8 +5,8 @@
  */
 import { createLocalEntity } from '@/api/store/localStore';
 import { createHttpEntity } from '@/api/store/httpStore';
+import { USE_API } from '@/api/runtime';
 
-const USE_API = Boolean(import.meta.env.VITE_STACK_PROJECT_ID);
 const make = (name) => (USE_API ? createHttpEntity(name) : createLocalEntity(name));
 
 export const Medication = make('medications');

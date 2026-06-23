@@ -25,8 +25,8 @@ CREATE TABLE "drug_interactions" (
 	"source" "interaction_source",
 	"acknowledged" boolean DEFAULT false NOT NULL,
 	"acknowledged_at" timestamp with time zone,
-	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
-	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
+	"created_date" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_date" timestamp with time zone DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE "emergency_contacts" (
@@ -40,8 +40,8 @@ CREATE TABLE "emergency_contacts" (
 	"is_primary" boolean DEFAULT false NOT NULL,
 	"can_view_medications" boolean DEFAULT false NOT NULL,
 	"notes" text,
-	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
-	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
+	"created_date" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_date" timestamp with time zone DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE "medication_schedules" (
@@ -56,8 +56,8 @@ CREATE TABLE "medication_schedules" (
 	"notes" text,
 	"injection_site" text,
 	"adherence_streak" integer DEFAULT 0 NOT NULL,
-	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
-	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
+	"created_date" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_date" timestamp with time zone DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE "medications" (
@@ -102,8 +102,8 @@ CREATE TABLE "medications" (
 	"cycle_weeks_on" integer,
 	"cycle_weeks_off" integer,
 	"cycle_start_date" date,
-	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
-	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
+	"created_date" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_date" timestamp with time zone DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE "pharmacies" (
@@ -121,8 +121,8 @@ CREATE TABLE "pharmacies" (
 	"longitude" numeric,
 	"is_favorite" boolean DEFAULT false NOT NULL,
 	"notes" text,
-	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
-	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
+	"created_date" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_date" timestamp with time zone DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE "profiles" (
@@ -133,8 +133,8 @@ CREATE TABLE "profiles" (
 	"notifications_enabled" boolean DEFAULT true NOT NULL,
 	"notification_lead_time" integer DEFAULT 15 NOT NULL,
 	"theme" "app_theme" DEFAULT 'vital' NOT NULL,
-	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
-	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
+	"created_date" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_date" timestamp with time zone DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE "shared_lists" (
@@ -151,8 +151,8 @@ CREATE TABLE "shared_lists" (
 	"access_code" text,
 	"expires_at" timestamp with time zone,
 	"active" boolean DEFAULT true NOT NULL,
-	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
-	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
+	"created_date" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_date" timestamp with time zone DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 ALTER TABLE "medication_schedules" ADD CONSTRAINT "medication_schedules_medication_id_medications_id_fk" FOREIGN KEY ("medication_id") REFERENCES "public"."medications"("id") ON DELETE cascade ON UPDATE no action;

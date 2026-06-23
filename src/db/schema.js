@@ -1,10 +1,14 @@
 /**
  * S.A.F.E Meds — database schema (Drizzle ORM, Postgres / Neon).
  *
- * Per-user isolation: every row carries `user_id` (the Stack Auth / Neon Auth
- * user id, which mirrors `neon_auth.users_sync.id`). The data API in
- * netlify/functions scopes every query by the authenticated user_id; Postgres
- * RLS can be layered on top later since Neon Auth is RLS-ready.
+ * JS property names are snake_case and timestamps are `created_date` /
+ * `updated_date` ON PURPOSE: they match the field names the client app already
+ * uses (the demo store + entity facade), so the Netlify data functions can pass
+ * rows straight through with no camel/snake translation. Timestamps use
+ * mode:'string' (ISO strings) and numerics mode:'number' to mirror the client.
+ *
+ * Per-user isolation: every row carries `user_id` (the Stack/Neon Auth user id);
+ * the data API scopes every query by it.
  */
 import { sql } from 'drizzle-orm';
 import {
@@ -31,113 +35,111 @@ export const relationshipEnum = pgEnum('contact_relationship', ['spouse', 'paren
 export const shareTypeEnum = pgEnum('share_type', ['doctor', 'family', 'caregiver']);
 export const themeEnum = pgEnum('app_theme', ['vital', 'after-dark', 'bento', 'clear']);
 
-/* shared timestamp columns */
-const timestamps = {
-  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
-  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull()
+/* shared timestamp columns (ISO strings, to match the client) */
+const stamps = {
+  created_date: timestamp('created_date', { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+  updated_date: timestamp('updated_date', { withTimezone: true, mode: 'string' }).defaultNow().notNull()
 };
 
-/* ── profiles (per-user settings; mirrors built-in User custom fields) ── */
+/* ── profiles ── */
 export const profiles = pgTable('profiles', {
-  userId: text('user_id').primaryKey(), // = neon_auth user id
+  user_id: text('user_id').primaryKey(),
   email: text('email'),
-  fullName: text('full_name'),
+  full_name: text('full_name'),
   allergies: text('allergies').array().default(sql`'{}'`),
-  notificationsEnabled: boolean('notifications_enabled').default(true).notNull(),
-  notificationLeadTime: integer('notification_lead_time').default(15).notNull(), // minutes before dose
+  notifications_enabled: boolean('notifications_enabled').default(true).notNull(),
+  notification_lead_time: integer('notification_lead_time').default(15).notNull(),
   theme: themeEnum('theme').default('vital').notNull(),
-  ...timestamps
+  ...stamps
 });
 
-/* ── medications (incl. supplements, vitamins, herbals, peptides) ── */
+/* ── medications ── */
 export const medications = pgTable('medications', {
   id: uuid('id').primaryKey().defaultRandom(),
-  userId: text('user_id').notNull(),
+  user_id: text('user_id').notNull(),
   name: text('name').notNull(),
   type: medTypeEnum('type').default('medication').notNull(),
-  genericName: text('generic_name'),
-  brandName: text('brand_name'),
-  dosage: text('dosage'),                 // display string e.g. "10mg"
+  generic_name: text('generic_name'),
+  brand_name: text('brand_name'),
+  dosage: text('dosage'),
   form: formEnum('form'),
   color: text('color'),
   shape: shapeEnum('shape'),
   imprint: text('imprint'),
-  reminderEnabled: boolean('reminder_enabled').default(true).notNull(),
-  sideEffects: text('side_effects'),
+  reminder_enabled: boolean('reminder_enabled').default(true).notNull(),
+  side_effects: text('side_effects'),
   frequency: frequencyEnum('frequency').default('once_daily').notNull(),
-  customFrequency: text('custom_frequency'),
-  times: text('times').array().default(sql`'{}'`),   // ["08:00","20:00"]
-  withFood: boolean('with_food').default(false),
+  custom_frequency: text('custom_frequency'),
+  times: text('times').array().default(sql`'{}'`),
+  with_food: boolean('with_food').default(false),
   instructions: text('instructions'),
-  prescribingDoctor: text('prescribing_doctor'),
-  startDate: date('start_date'),
-  endDate: date('end_date'),
+  prescribing_doctor: text('prescribing_doctor'),
+  start_date: date('start_date'),
+  end_date: date('end_date'),
   pharmacy: text('pharmacy'),
-  ndcNumber: text('ndc_number'),
-  rxnormId: text('rxnorm_id'),
+  ndc_number: text('ndc_number'),
+  rxnorm_id: text('rxnorm_id'),
   active: boolean('active').default(true).notNull(),
   notes: text('notes'),
   quantity: integer('quantity'),
-  refillsLeft: integer('refills_left'),
-  refillDueDate: date('refill_due_date'),
-  supplementPurpose: text('supplement_purpose'),
-  ingredientList: text('ingredient_list').array().default(sql`'{}'`),
-
-  /* ── peptide-specific ── */
-  vialAmountMg: numeric('vial_amount_mg'),                 // e.g. 5 (mg in vial)
-  bacWaterMl: numeric('bac_water_ml'),                     // e.g. 2 (mL reconstitution fluid)
-  concentrationMcgPerMl: numeric('concentration_mcg_per_ml'), // derived: vial_mg*1000 / bac_mL
-  doseAmount: numeric('dose_amount'),                      // e.g. 250
-  doseUnit: doseUnitEnum('dose_unit'),                     // mcg / IU / mg / mL
-  injectionRoute: injectionRouteEnum('injection_route'),
-  injectionSites: text('injection_sites').array().default(sql`'{}'`), // rotation pool
-  cycleWeeksOn: integer('cycle_weeks_on'),
-  cycleWeeksOff: integer('cycle_weeks_off'),
-  cycleStartDate: date('cycle_start_date'),
-
-  ...timestamps
+  refills_left: integer('refills_left'),
+  refill_due_date: date('refill_due_date'),
+  supplement_purpose: text('supplement_purpose'),
+  ingredient_list: text('ingredient_list').array().default(sql`'{}'`),
+  // peptide-specific
+  vial_amount_mg: numeric('vial_amount_mg', { mode: 'number' }),
+  bac_water_ml: numeric('bac_water_ml', { mode: 'number' }),
+  concentration_mcg_per_ml: numeric('concentration_mcg_per_ml', { mode: 'number' }),
+  dose_amount: numeric('dose_amount', { mode: 'number' }),
+  dose_unit: doseUnitEnum('dose_unit'),
+  injection_route: injectionRouteEnum('injection_route'),
+  injection_sites: text('injection_sites').array().default(sql`'{}'`),
+  cycle_weeks_on: integer('cycle_weeks_on'),
+  cycle_weeks_off: integer('cycle_weeks_off'),
+  cycle_start_date: date('cycle_start_date'),
+  ...stamps
 });
 
-/* ── medication_schedules (individual dose instances) ── */
-export const medicationSchedules = pgTable('medication_schedules', {
+/* ── medication_schedules ── */
+export const medication_schedules = pgTable('medication_schedules', {
   id: uuid('id').primaryKey().defaultRandom(),
-  userId: text('user_id').notNull(),
-  medicationId: uuid('medication_id').notNull().references(() => medications.id, { onDelete: 'cascade' }),
-  scheduledTime: text('scheduled_time').notNull(),  // "08:00"
+  user_id: text('user_id').notNull(),
+  medication_id: uuid('medication_id').notNull().references(() => medications.id, { onDelete: 'cascade' }),
+  scheduled_time: text('scheduled_time').notNull(),
   date: date('date').notNull(),
   taken: boolean('taken').default(false).notNull(),
-  takenAt: timestamp('taken_at', { withTimezone: true }),
+  taken_at: timestamp('taken_at', { withTimezone: true, mode: 'string' }),
   skipped: boolean('skipped').default(false).notNull(),
   notes: text('notes'),
-  injectionSite: text('injection_site'),            // site used for this peptide dose
-  adherenceStreak: integer('adherence_streak').default(0).notNull(),
-  ...timestamps
+  injection_site: text('injection_site'),
+  adherence_streak: integer('adherence_streak').default(0).notNull(),
+  ...stamps
 });
 
 /* ── drug_interactions ── */
-export const drugInteractions = pgTable('drug_interactions', {
+export const drug_interactions = pgTable('drug_interactions', {
   id: uuid('id').primaryKey().defaultRandom(),
-  userId: text('user_id').notNull(),
-  medicationAId: uuid('medication_a_id'),
-  medicationBId: uuid('medication_b_id'),
-  medicationAName: text('medication_a_name'),
-  medicationBName: text('medication_b_name'),
+  user_id: text('user_id').notNull(),
+  medication_a_id: uuid('medication_a_id'),
+  medication_b_id: uuid('medication_b_id'),
+  medication_a_name: text('medication_a_name'),
+  medication_b_name: text('medication_b_name'),
   severity: severityEnum('severity').notNull(),
-  confidence: integer('confidence'),                // 0–100
+  confidence: integer('confidence'),
   description: text('description').notNull(),
   mechanism: text('mechanism'),
-  clinicalEffects: text('clinical_effects').array().default(sql`'{}'`),
+  clinical_effects: text('clinical_effects').array().default(sql`'{}'`),
   recommendations: text('recommendations').array().default(sql`'{}'`),
   source: interactionSourceEnum('source'),
   acknowledged: boolean('acknowledged').default(false).notNull(),
-  acknowledgedAt: timestamp('acknowledged_at', { withTimezone: true }),
-  ...timestamps
+  acknowledged_at: timestamp('acknowledged_at', { withTimezone: true, mode: 'string' }),
+  ...stamps
 });
 
-/* ── pharmacies (user's saved pharmacies) ── */
+/* ── pharmacies ── */
 export const pharmacies = pgTable('pharmacies', {
   id: uuid('id').primaryKey().defaultRandom(),
-  userId: text('user_id').notNull(),
+  user_id: text('user_id').notNull(),
   name: text('name').notNull(),
   address: text('address'),
   city: text('city'),
@@ -146,42 +148,42 @@ export const pharmacies = pgTable('pharmacies', {
   phone: text('phone'),
   fax: text('fax'),
   hours: text('hours'),
-  latitude: numeric('latitude'),
-  longitude: numeric('longitude'),
-  isFavorite: boolean('is_favorite').default(false).notNull(),
+  latitude: numeric('latitude', { mode: 'number' }),
+  longitude: numeric('longitude', { mode: 'number' }),
+  is_favorite: boolean('is_favorite').default(false).notNull(),
   notes: text('notes'),
-  ...timestamps
+  ...stamps
 });
 
 /* ── emergency_contacts ── */
-export const emergencyContacts = pgTable('emergency_contacts', {
+export const emergency_contacts = pgTable('emergency_contacts', {
   id: uuid('id').primaryKey().defaultRandom(),
-  userId: text('user_id').notNull(),
+  user_id: text('user_id').notNull(),
   name: text('name').notNull(),
   relationship: relationshipEnum('relationship').notNull(),
   phone: text('phone').notNull(),
-  phoneSecondary: text('phone_secondary'),
+  phone_secondary: text('phone_secondary'),
   email: text('email'),
-  isPrimary: boolean('is_primary').default(false).notNull(),
-  canViewMedications: boolean('can_view_medications').default(false).notNull(),
+  is_primary: boolean('is_primary').default(false).notNull(),
+  can_view_medications: boolean('can_view_medications').default(false).notNull(),
   notes: text('notes'),
-  ...timestamps
+  ...stamps
 });
 
-/* ── shared_lists (shareable med lists via access code) ── */
-export const sharedLists = pgTable('shared_lists', {
+/* ── shared_lists ── */
+export const shared_lists = pgTable('shared_lists', {
   id: uuid('id').primaryKey().defaultRandom(),
-  userId: text('user_id').notNull(),
+  user_id: text('user_id').notNull(),
   title: text('title').notNull(),
   description: text('description'),
-  medicationIds: uuid('medication_ids').array().default(sql`'{}'`),
-  recipientEmail: text('recipient_email'),
-  recipientName: text('recipient_name'),
-  shareType: shareTypeEnum('share_type'),
-  includeSchedule: boolean('include_schedule').default(true).notNull(),
-  favoritePharmacy: text('favorite_pharmacy'), // JSON string snapshot
-  accessCode: text('access_code'),
-  expiresAt: timestamp('expires_at', { withTimezone: true }),
+  medication_ids: uuid('medication_ids').array().default(sql`'{}'`),
+  recipient_email: text('recipient_email'),
+  recipient_name: text('recipient_name'),
+  share_type: shareTypeEnum('share_type'),
+  include_schedule: boolean('include_schedule').default(true).notNull(),
+  favorite_pharmacy: text('favorite_pharmacy'),
+  access_code: text('access_code'),
+  expires_at: timestamp('expires_at', { withTimezone: true, mode: 'string' }),
   active: boolean('active').default(true).notNull(),
-  ...timestamps
+  ...stamps
 });

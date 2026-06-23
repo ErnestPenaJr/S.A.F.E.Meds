@@ -4,8 +4,7 @@
  */
 import { api } from '@/api/client';
 import { mockAnalyze } from '@/lib/interactionsMock';
-
-const USE_API = Boolean(import.meta.env.VITE_STACK_PROJECT_ID);
+import { USE_API } from '@/api/runtime';
 
 export async function analyzeInteractions(medications) {
   if (USE_API) {
