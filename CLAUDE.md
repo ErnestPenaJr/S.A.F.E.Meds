@@ -15,7 +15,7 @@ This was originally built on the **Base44** BaaS platform; it is being **rebuilt
 | Frontend | React 19 + Vite, react-router-dom v7, @tanstack/react-query |
 | Styling | Tailwind **v3** + shadcn/ui (Radix), CSS-variable design tokens |
 | Data | **Netlify DB (Neon Postgres)** via **Drizzle ORM** |
-| Auth | **Neon Auth (Stack Auth)** — users sync into `neon_auth.users_sync` |
+| Auth | **Built-in email/password** — `users` table, scrypt hashing + HS256 JWT (`AUTH_JWT_SECRET`), all in Netlify Functions |
 | Backend | **Netlify Functions** (the data API + AI proxy) under `/api/*` |
 | AI / external | Claude (interaction analysis, education, smart schedule) · RxNorm/openFDA (med search) · geo + Leaflet/OSM (pharmacy) |
 | Delivery | Netlify hosting + installable **PWA** (vite-plugin-pwa) |
@@ -41,7 +41,9 @@ No test runner or linter is configured yet. Don't add one unless asked.
 
 **The browser never touches Postgres.** Data flows `React → fetch('/api/...') → Netlify Function → Neon`. `netlify.toml` redirects `/api/*` to `/.netlify/functions/*`. The frontend calls the API through the facade in `src/api/client.js` (`api.get/post/patch/del`); functions live in `netlify/functions/`. When adding a data feature you write *both* sides: a function that queries Neon (scoped by user) and a client call.
 
-**Per-user isolation is enforced in the API, not the client.** Every table carries a `user_id` (= the Stack Auth user id, which mirrors `neon_auth.users_sync.id`). Each function must verify the Stack session token and filter every query by that `user_id`. There is no Supabase-style client-side RLS — if a function forgets to scope by `user_id`, data leaks. (Postgres RLS can be layered on later since Neon Auth is RLS-ready.)
+**Auth is built-in email/password.** `netlify/functions/auth.js` handles `POST /api/auth/signup` + `/login` and `GET /api/auth/me` — scrypt password hashing (`_lib/password.js`) and HS256 session JWTs (`_lib/jwt.js`, signed with `AUTH_JWT_SECRET`), no third-party provider. The client stores the JWT and sends it as `Authorization: Bearer <jwt>`; `AuthContext` exposes `signUp/signIn/signOut`. (`profiles`/`neon_auth` are not used.)
+
+**Per-user isolation is enforced in the API, not the client.** Every table carries a `user_id` (= `users.id`). Each data function calls `getUserId(req)` (`_lib/auth.js`), which verifies the Bearer JWT and returns its `sub`; every query is filtered by that `user_id`. There is no client-side RLS — if a function forgets to scope by `user_id`, data leaks. (Postgres RLS can be layered on later.)
 
 **Theming is a first-class, swappable token system.** All four design directions (`vital`, `after-dark`, `bento`, `clear`) are real user-selectable themes, persisted to `profiles.theme`. They are driven by CSS variables in `src/index.css`: `:root` holds the default (Vital); each other theme overrides the same vars under `[data-theme="..."]`. Components read the vars (via Tailwind tokens like `bg-primary`, `text-foreground`) and never hardcode hex — so flipping the `data-theme` attribute reskins the whole app. Themes also differ in **layout** (a per-theme dashboard "hero variant": banner / ring / tiles / big-action), not just color. The peptide accent (`--peptide`, violet) stays consistent across all themes.
 
@@ -62,18 +64,20 @@ Defined in `src/db/schema.js` (Drizzle): `profiles`, `medications`, `medication_
 
 ## Secrets / env (`.env`, never committed — see `.env.example`)
 
-`NETLIFY_DATABASE_URL` (Neon) · `VITE_STACK_PROJECT_ID` + `VITE_STACK_PUBLISHABLE_CLIENT_KEY` (client) · `STACK_SECRET_SERVER_KEY` (functions only) · `ANTHROPIC_API_KEY` (functions only). `VITE_*` vars are exposed to the browser — only publishable values go there.
+`NETLIFY_DATABASE_URL` (Neon — auto-injected on deploy by Netlify DB) · `VITE_USE_API` (`true` flips the client to the live backend; build-time) · `AUTH_JWT_SECRET` (functions only — signs session JWTs) · `ANTHROPIC_API_KEY` (functions only). `VITE_*` vars are exposed to the browser — only non-secret values go there.
 
 ## Status
 
 **All 6 phases' app code complete** (scaffold; themes+shell+stub-auth; meds/schedule/dashboard/peptides; AI interactions; pharmacy; sharing + emergency card; PWA polish). The map route is code-split (`PharmacyMap` lazy-loaded) so the main bundle is ~125 kB gzip. Deployable to Netlify as a working **demo today** — see `DEPLOY.md`.
 
-**Remaining for production (the "exit demo mode" work):** the per-entity data API functions don't exist yet — `src/api/store/httpStore.js` expects `/api/<entity>` endpoints, but only `analyze-interactions` is built. Setting `VITE_STACK_PROJECT_ID` flips the client to that HTTP store, so build `netlify/functions/<entity>.js` (verify Stack session, scope by `user_id`, schema in `src/db/schema.js`) + run `db:migrate` + wire `src/lib/AuthContext.jsx` to Stack *before* flipping. Until then, leave `VITE_STACK_PROJECT_ID` unset and the app runs fully in demo mode.
+**Backend is built (data API + auth).** Per-entity CRUD functions exist for all six tables (`netlify/functions/<entity>.js` via a shared `_lib/crud.js` factory, scoped by `user_id`), plus `auth.js` (signup/login/me). Migrations live in `netlify/database/migrations/` (Netlify-managed; auto-applied on deploy). `src/api/store/httpStore.js` targets these; `VITE_USE_API=true` flips the client onto them.
+
+**The one remaining gate is provisioning the DB.** Netlify DB (Neon) only provisions on a **production deploy** (`netlify deploy --build --prod`) — there's no local connection string, so end-to-end can't be verified locally. After a deploy (with `VITE_USE_API=true` + `AUTH_JWT_SECRET` set on the site, both already configured), `/api/auth/*` and the data API run against Neon. Caveat: auth scopes per `users.id`, which is real multi-user — that part is done.
 
 Navigation: the bottom bar holds Home / Meds / **+ (log dose → AddMedication)** / Schedule / **More**; the "More" sheet (`src/Layout.jsx`) is how Interactions, Pharmacy, Share, Emergency Card, and Profile are reached. `/sharedview` renders bare (no auth, no Layout) — gated in `src/App.jsx`. Emergency Card prints via `window.print()`; app chrome carries `print:hidden`.
 
 **Responsive (mobile-first + desktop):** below `lg` it's the mobile shell (top bar + bottom nav). At `lg+`, `src/Layout.jsx` shows a fixed left **sidebar** (full nav, "Add medication" CTA, theme, user + sign-out), hides the mobile bar/nav, and `main` widens (`lg:max-w-6xl`, `lg:pl-72`). Pages adapt at `lg`: Home → 2-col dashboard (`[380px_1fr]`), Medications → card grid (`sm:2 / xl:3`), Pharmacy → map+list side-by-side (sticky map), and form/single-column pages (AddMedication, Schedule, Interactions, EmergencyCard, Profile, Share) cap to `lg:max-w-2xl`/`3xl`. Keep both layouts working when editing a page.
 
-Still running in **demo mode** (localStorage data + stubbed auth + mock AI) until Neon/Stack/Anthropic keys are added — flip happens via `VITE_STACK_PROJECT_ID` (data + AI) and `ANTHROPIC_API_KEY` (the function), with no page changes.
+Locally (`npm run dev`, no `VITE_USE_API`) the app runs in **demo mode** (localStorage data + one-tap demo sign-in + mock AI). With `VITE_USE_API=true` it uses the live backend (real email/password auth + Neon data + Claude); the AI function still needs `ANTHROPIC_API_KEY` or it returns a clear "not configured" payload.
 
 **AI layer (Phase 3):** `src/api/ai.js` is the facade. Demo mode → `src/lib/interactionsMock.js`; live mode → `POST /api/analyze-interactions` (`netlify/functions/analyze-interactions.js`), which calls **Claude `claude-opus-4-8`** with adaptive thinking + **structured outputs** (`output_config.format` against a JSON schema) and degrades to a clear "not configured" payload when `ANTHROPIC_API_KEY` is unset. Drug-drug results persist to the `DrugInteraction` entity (acknowledge state carried across re-runs); food + safety are cached in localStorage (`src/lib/analysisCache.js`). `@anthropic-ai/sdk` is a function-only dependency — never import it under `src/` (it must not enter the client bundle).
