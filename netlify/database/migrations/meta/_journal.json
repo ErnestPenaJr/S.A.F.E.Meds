@@ -8,6 +8,13 @@
       "when": 1782221271061,
       "tag": "0000_init_safemeds",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1782240098166,
+      "tag": "0001_add_users",
+      "breakpoints": true
     }
   ]
 }

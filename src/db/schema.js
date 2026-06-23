@@ -41,6 +41,15 @@ const stamps = {
   updated_date: timestamp('updated_date', { withTimezone: true, mode: 'string' }).defaultNow().notNull()
 };
 
+/* ── users (built-in email/password auth) ── */
+export const users = pgTable('users', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  email: text('email').notNull().unique(),
+  password_hash: text('password_hash').notNull(),
+  full_name: text('full_name'),
+  ...stamps
+});
+
 /* ── profiles ── */
 export const profiles = pgTable('profiles', {
   user_id: text('user_id').primaryKey(),

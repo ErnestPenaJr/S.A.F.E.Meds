@@ -6,21 +6,25 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/lib/AuthContext';
 
-export default function Login() {
-  const { signIn, signInDemo, useApi } = useAuth();
+export default function Signup() {
+  const { signUp } = useAuth();
+  const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirm, setConfirm] = useState('');
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
 
   const submit = async (e) => {
     e.preventDefault();
     setError('');
+    if (password.length < 8) return setError('Password must be at least 8 characters.');
+    if (password !== confirm) return setError('Passwords do not match.');
     setBusy(true);
     try {
-      await signIn({ email, password });
+      await signUp({ email, password, fullName });
     } catch (ex) {
-      setError(ex?.message?.replace(/^API \d+ on [^:]+:\s*/, '') || 'Sign in failed.');
+      setError(ex?.message?.replace(/^API \d+ on [^:]+:\s*/, '') || 'Sign up failed.');
     } finally {
       setBusy(false);
     }
@@ -32,33 +36,35 @@ export default function Login() {
         <span className="grid h-16 w-16 place-items-center rounded-2xl bg-gradient-to-br from-secondary to-primary text-primary-foreground">
           <Pill className="h-8 w-8" />
         </span>
-        <h1 className="font-heading text-3xl font-extrabold tracking-tight">
-          S.A.F.E <span className="text-primary">Meds</span>
-        </h1>
-        <p className="text-sm text-muted-foreground">Welcome back. Sign in to your medications.</p>
+        <h1 className="font-heading text-3xl font-extrabold tracking-tight">Create your account</h1>
+        <p className="text-sm text-muted-foreground">Track medications, supplements, and peptides.</p>
       </div>
 
       <form onSubmit={submit} className="flex w-full max-w-xs flex-col gap-4">
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor="name">Name</Label>
+          <Input id="name" type="text" autoComplete="name" value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Your name" />
+        </div>
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="email">Email</Label>
           <Input id="email" type="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" required />
         </div>
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="password">Password</Label>
-          <Input id="password" type="password" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" required />
+          <Input id="password" type="password" autoComplete="new-password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="At least 8 characters" required />
+        </div>
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor="confirm">Confirm password</Label>
+          <Input id="confirm" type="password" autoComplete="new-password" value={confirm} onChange={(e) => setConfirm(e.target.value)} placeholder="Re-enter password" required />
         </div>
 
         {error && <p className="text-sm font-medium text-destructive">{error}</p>}
 
-        <Button type="submit" size="lg" disabled={busy}>{busy ? 'Signing in…' : 'Sign in'}</Button>
+        <Button type="submit" size="lg" disabled={busy}>{busy ? 'Creating…' : 'Create account'}</Button>
 
         <p className="text-center text-sm text-muted-foreground">
-          New here? <Link to="/signup" className="font-semibold text-primary">Create an account</Link>
+          Already have an account? <Link to="/login" className="font-semibold text-primary">Sign in</Link>
         </p>
-
-        {!useApi && (
-          <Button type="button" variant="outline" onClick={signInDemo}>Continue in demo mode</Button>
-        )}
       </form>
 
       <p className="max-w-xs text-center text-[11px] leading-relaxed text-muted-foreground">

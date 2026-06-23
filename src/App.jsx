@@ -7,6 +7,7 @@ import { PAGES, mainPage } from '@/pages.config';
 import { createPageUrl } from '@/utils';
 import Layout from '@/Layout';
 import Login from '@/pages/Login';
+import Signup from '@/pages/Signup';
 import SharedView from '@/pages/SharedView';
 import NotFound from '@/pages/NotFound';
 
@@ -28,7 +29,14 @@ function Gate() {
   }
 
   if (isLoading) return <FullScreenSpinner />;
-  if (!isAuthenticated) return <Login />;
+  if (!isAuthenticated) {
+    return (
+      <Routes>
+        <Route path={createPageUrl('Signup')} element={<Signup />} />
+        <Route path="*" element={<Login />} />
+      </Routes>
+    );
+  }
   return (
     <Layout>
       <Routes>
